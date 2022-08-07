@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static 'js/sha1.js' %}" type="text/javascript"></script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        var csrftoken = getCookie('csrftoken');
+
+        var xhr;
+
+        function loginCheck(bno) {
+
+            memberid = document.getElementById("member_id").value;
+            if(memberid == "") {
+                alert("아이디를 넣으세요.");
+                document.getElementById("member_id").focus();
+                return false;
+            }
+
+            memberpwd = document.getElementById("member_pwd").value;
+            if(memberpwd == "") {
+                alert("비밀번호를 넣으세요.");
+                document.getElementById("member_pwd").focus();
+                return false;
+            }
+            pwdencrypted = hex_sha1(memberpwd);
+
+            var strurl = "member_login?member_id=" + memberid + "&member_pwd=" + pwdencrypted;
+            //alert(strurl);
+            //return false;
+
+            xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    var data = xhr.responseText;
+
+                    var obj = JSON.parse(data);
+                    if(obj.flag == "0"){
+                        location.href = "/";
+                    }
+                    else {
+                        alert(obj.result_msg);
+                        document.getElementById("member_id").focus();
+                    }
+                }
+            };
+            xhr.open("GET", strurl);
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            xhr.send(null);
+        }
+
+
+    </script>
+{% endblock %}
+
+{% block body %}
+
+    {% include "navbar.html" %}
+
+    <!-- ======= Hero Section ======= -->
+    <section id="hero" class="d-flex align-items-center">
+
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-6 pt-5 pt-lg-0 order-2 order-lg-1 d-flex flex-column justify-content-center">
+            <h2 data-aos="fade-up">만성 스트레스 지수 : {{sj_stress}}</h2>
+              <h2 data-aos="fade-up">급성 스트레스 지수 : {{sj_stress2}}</h2>
+
+
+            <div data-aos="fade-up" data-aos-delay="800">
+
+            </div>
+          </div>
+          <div class="col-lg-6 order-1 order-lg-2 hero-img" data-aos="fade-left" data-aos-delay="200">
+            <img src="{% static 'assets/img/stress_info.png' %}" width="850" height="550"  alt="">
+          </div>
+        </div>
+      </div>
+
+    </section><!-- End Hero -->
+
+    <main id="main">
+    </main><!-- End #main -->
+
+    {% include "footer.html" %}
+
+{% endblock %}
+
